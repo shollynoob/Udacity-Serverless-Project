@@ -1,39 +1,23 @@
 import 'source-map-support/register'
 
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import * as middy from 'middy'
-import { cors, httpErrorHandler } from 'middy/middlewares'
+import {APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler} from 'aws-lambda'
+import {generateUploadUrl} from "../../businessLogic/ToDo";
 
-import { createAttachmentPresignedUrl } from '../../businessLogic/todos'
-import { getUserId } from '../utils'
-import { getTodoById, updateTodo } from '../../helpers/todosAcess'
-import { getUploadUrl } from '../../helpers/attachmentUtils'
-const bucketname = process.env.ATTACHMENT_S3_BUCKET
-
-export const handler = middy(
-  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const todoId = event.pathParameters.todoId
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
-    const todo = await getTodoById(todoId)
-    todo.attachmentUrl = `https://${bucketname}.s3.amazonaws.com/${todoId}`
+    console.log("Processing Event ", event);
+    const todoId = event.pathParameters.todoId;
 
-    updateTodo(todo);
-    const url = await getUploadUrl(todoId)
+    const URL = await generateUploadUrl(todoId);
 
     return {
-      statusCode: 200,
-      body: JSON.stringify({
-        uploadUrl: url
-      })
-    
-    }
-  }
-)
-
-handler
-  .use(httpErrorHandler())
-  .use(
-    cors({
-      credentials: true
-    })
-  )
+        statusCode: 202,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            'Access-Control-Allow-Credentials': true, 
+        },
+        body: JSON.stringify({
+            uploadUrl: URL,
+        })
+    };
+};

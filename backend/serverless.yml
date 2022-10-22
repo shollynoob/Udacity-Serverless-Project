@@ -6,7 +6,7 @@ service: serverless-todo-app
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
-  - serverless-plugin-tracing
+  #- serverless-plugin-tracing
   - serverless-reqvalidator-plugin
   - serverless-aws-documentation
 
@@ -103,10 +103,10 @@ functions:
         - dynamodb:Query
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
     - Effect: Allow
-        Action: 
-         - xray:PutTraceSegments
-        Resource:
-          - '*'
+      Action: 
+        - xray:PutTraceSegments
+      Resource:
+        - '*'
 
 
   # TODO: Configure this function - 
