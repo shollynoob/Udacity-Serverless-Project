@@ -91,7 +91,7 @@ export default class Auth {
       return_to: window.location.origin
     });
 
-    // navigate to the home route
+    // navigate to the home rtimeoute
     this.history.replace('/');
   }
 
